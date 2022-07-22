@@ -23,7 +23,7 @@ def get_argments():
     parser.add_argument('--num_classes', type=int, default=11)
     parser.add_argument('--num_workers', type=int, default=4)
     parser.add_argument('--resize', type=int, default=227)
-    parser.add_argument('--patience', type=int, default=10)
+    parser.add_argument('--patience', type=int, default=3)
     parser.add_argument('--file_path', type=str, required=True)
     return parser.parse_args()
 
@@ -68,8 +68,11 @@ def main():
 
 def train(args, model, optimizer, criterion, train_loader, valid_loader, patience, device):
     early_stop = 0
+    train_loss = []
+    valid_loss = []
     for epoch in range(1,args.epochs+1):
         train_losses = AverageMeter()
+        val_losses = AverageMeter()
         model.train()
 
         with tqdm(total=len(train_loader) - len(train_loader) % args.batchsize) as t:
@@ -94,8 +97,9 @@ def train(args, model, optimizer, criterion, train_loader, valid_loader, patienc
                 t.set_postfix(loss=f'{train_losses.avg:.4f}')
                 t.update(len(inputs))
 
+        train_loss.append(train_losses.avg)
+
         model.eval()
-        val_losses = AverageMeter()
         for data in valid_loader:
             inputs, labels = data
 
@@ -107,6 +111,7 @@ def train(args, model, optimizer, criterion, train_loader, valid_loader, patienc
                 loss  = criterion(preds, labels)
             val_losses.update(loss.item(), len(inputs))
 
+        valid_loss.append(val_losses.avg)
 
         if epoch == 1:
             best_loss = val_losses.avg
@@ -127,15 +132,15 @@ def train(args, model, optimizer, criterion, train_loader, valid_loader, patienc
 
     print(f'best epoch: {best_epoch}, loss: {best_loss:.4f}')
     
-    plot_learning_curve(train_losses.get_all(), val_losses.get_all())
+    plot_learning_curve(train_loss, valid_loss, epoch)
     torch.save(best_model, 'best.pth')
 
-def plot_learning_curve(train_loss, valid_loss):
+def plot_learning_curve(train_loss, valid_loss, epoch):
     plt.figure(figsize=(5,5))
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
-    plt.plot(len(train_loss), train_loss, '-', color='r')
-    plt.plot(len(valid_loss), valid_loss, '-', color='o')
+    plt.plot(np.arange(1,epoch+1), train_loss, '-', color='b', label='train')
+    plt.plot(np.arange(1,epoch+1), valid_loss, '-', color='r', label='valid')
     plt.legend(loc='best')
     plt.show()
 
