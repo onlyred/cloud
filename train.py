@@ -17,9 +17,9 @@ from torch.optim import SGD, Adam
 
 def get_argments():
     parser = argparse.ArgumentParser(description='cloud-type-classification')
-    parser.add_argument('--batchsize', type=int, default=16)
-    parser.add_argument('--epochs', type=int, default=1000)
-    parser.add_argument('--learning_rate', type=int, default=0.001)
+    parser.add_argument('--batchsize', type=int, default=32)
+    parser.add_argument('--epochs', type=int, default=10000)
+    parser.add_argument('--learning_rate', type=int, default=0.01)
     parser.add_argument('--num_classes', type=int, default=11)
     parser.add_argument('--num_workers', type=int, default=4)
     parser.add_argument('--resize', type=int, default=227)
@@ -57,8 +57,8 @@ def main():
     net.to(device)
     optim = SGD(net.parameters(), 
                 lr=args.learning_rate,
-                momentum=0.95,
-                weight_decay=0.00005)
+                momentum=0.9,
+                weight_decay=0.09)
     #optim = Adam(net.parameters(), 
     #             lr=args.learning_rate)
     criterion = nn.CrossEntropyLoss()
@@ -70,6 +70,7 @@ def train(args, model, optimizer, criterion, train_loader, valid_loader, patienc
     early_stop = 0
     train_loss = []
     valid_loss = []
+    corrections= []
     for epoch in range(1,args.epochs+1):
         train_losses = AverageMeter()
         val_losses = AverageMeter()
@@ -117,6 +118,7 @@ def train(args, model, optimizer, criterion, train_loader, valid_loader, patienc
             val_losses.update(loss.item(), len(inputs))
 
         valid_loss.append(val_losses.avg)
+        corrections.append(correct)
 
         if epoch == 1:
             best_loss = val_losses.avg
@@ -139,15 +141,20 @@ def train(args, model, optimizer, criterion, train_loader, valid_loader, patienc
 
     print(f'best epoch: {best_epoch}, loss: {best_loss:.9f}')
     
-    plot_learning_curve(train_loss, valid_loss, epoch)
+    plot_learning_curve(train_loss, valid_loss, corrections, epoch)
     torch.save(best_model, 'best.pth')
 
-def plot_learning_curve(train_loss, valid_loss, epoch):
-    plt.figure(figsize=(5,5))
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.plot(np.arange(1,epoch+1), train_loss, '-', color='b', label='train')
-    plt.plot(np.arange(1,epoch+1), valid_loss, '-', color='r', label='valid')
+def plot_learning_curve(train_loss, valid_loss, corr, epoch):
+    fig, ax1 = plt.subplots(figsize=(5,5))
+    ax1.set_xlabel('Epochs')
+    ax1.set_ylabel('Loss')
+    ax1.plot(np.arange(1,epoch+1), train_loss, '-', color='b', label='train-loss')
+    ax1.plot(np.arange(1,epoch+1), valid_loss, '-', color='r', label='valid-loss')
+  
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Correction(%)')
+    ax2.plot(np.arange(1,epoch+1), corr, '-', color='g', label='valid-corr')
+
     plt.legend(loc='best')
     plt.savefig('learning_curve.png')
     plt.close()
