@@ -157,14 +157,17 @@ def plot_learning_curve(train_loss, valid_loss, corr, epoch):
     fig, ax1 = plt.subplots(figsize=(5,5))
     ax1.set_xlabel('Epochs')
     ax1.set_ylabel('Loss')
-    ax1.plot(np.arange(1,epoch+1), train_loss, '-', color='b', label='train-loss')
-    ax1.plot(np.arange(1,epoch+1), valid_loss, '-', color='r', label='valid-loss')
+    line1 = ax1.plot(np.arange(1,epoch+1), train_loss, '-', color='b', label='train-loss')
+    line2 = ax1.plot(np.arange(1,epoch+1), valid_loss, '-', color='r', label='valid-loss')
   
     ax2 = ax1.twinx()
     ax2.set_ylabel('Correction(%)')
-    ax2.plot(np.arange(1,epoch+1), corr, '-', color='g', label='valid-corr')
+    line3 = ax2.plot(np.arange(1,epoch+1), corr, '-', color='g', label='valid-corr')
+    # legend
+    line = line1 + line2 + line3
+    labs = [l.get_label() for l in lns]
+    ax.legend(line, labs, loc='best')
 
-    plt.legend(loc='best')
     plt.savefig('learning_curve.png')
     plt.close()
 
