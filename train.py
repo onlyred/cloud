@@ -12,7 +12,7 @@ from util import AverageMeter
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
-from torch.optim import SGD, Adam
+from torch.optim import SGD, Adam, lr_scheduler
 
 
 def get_argments():
@@ -57,16 +57,24 @@ def main():
     net.to(device)
     optim = SGD(net.parameters(), 
                 lr=args.learning_rate,
-                momentum=0.9,
-                weight_decay=0.09)
+                momentum=0.9)
+                #weight_decay=0.1)
+    scheduler = lr_scheduler.CyclicLR(optim, 
+                                      base_lr=0.00001, 
+                                      step_size_up=5, 
+                                      max_lr=args.learning_rate,
+                                      gamma=0.5,
+                                      mode='exp_range')
     #optim = Adam(net.parameters(), 
-    #             lr=args.learning_rate)
+    #             lr=args.learning_rate,
+    #            weight_decay=0.1)
     criterion = nn.CrossEntropyLoss()
 
-    train(args, net, optim, criterion, 
+    train(args, net, optim, criterion, scheduler,
           train_loader, valid_loader, args.patience, device)
 
-def train(args, model, optimizer, criterion, train_loader, valid_loader, patience, device):
+def train(args, model, optimizer, criterion, scheduler, 
+          train_loader, valid_loader, patience, device):
     early_stop = 0
     train_loss = []
     valid_loss = []
@@ -138,6 +146,7 @@ def train(args, model, optimizer, criterion, train_loader, valid_loader, patienc
                 break
 
         print(f'eval : {val_losses.avg:.6f}, best correct : {best_corr:.2f}% ( {early_stop} / {patience} )')
+        scheduler.step()  
 
     print(f'best epoch: {best_epoch}, loss: {best_loss:.9f}')
     
