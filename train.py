@@ -23,7 +23,7 @@ def get_argments():
     parser.add_argument('--num_classes', type=int, default=11)
     parser.add_argument('--num_workers', type=int, default=4)
     parser.add_argument('--resize', type=int, default=227)
-    parser.add_argument('--patience', type=int, default=25)
+    parser.add_argument('--patience', type=int, default=100)
     parser.add_argument('--file_path', type=str, required=True)
     return parser.parse_args()
 
@@ -73,17 +73,17 @@ def train(args, model, optimizer, criterion, train_loader, valid_loader, patienc
     for epoch in range(1,args.epochs+1):
         train_losses = AverageMeter()
         val_losses = AverageMeter()
-        model.train()
+        valid_corr = 0
+        total_corr = 0
 
+        model.train()
         with tqdm(total=len(train_loader) - len(train_loader) % args.batchsize) as t:
             t.set_description(f"epoch : {epoch}/{args.epochs}")
 
             for data in train_loader:
                 inputs, labels = data
-
                 inputs = inputs.to(device)
                 labels = labels.to(device)
-
                 preds = model(inputs)
 
                 loss  = criterion(preds, labels)
@@ -107,19 +107,26 @@ def train(args, model, optimizer, criterion, train_loader, valid_loader, patienc
             labels = labels.to(device)
 
             with torch.no_grad():
-                preds = model(inputs)
-                loss  = criterion(preds, labels)
+                output = model(inputs)
+                loss  = criterion(output, labels)
+                _, preds = torch.max(output.data, 1) # return values, indices 
+                valid_corr += (preds == labels).sum().item()
+                total_corr += labels.size(0)
+                correct = 100. * valid_corr / total_corr
+
             val_losses.update(loss.item(), len(inputs))
 
         valid_loss.append(val_losses.avg)
 
         if epoch == 1:
             best_loss = val_losses.avg
+            best_corr = correct
             best_epoch = epoch
             best_model = copy.deepcopy(model.state_dict())
-        elif val_losses.avg < best_loss:  # min
+        elif correct > best_corr:  # max
             best_epoch = epoch
             best_loss = val_losses.avg
+            best_corr = correct
             best_model = copy.deepcopy(model.state_dict())
             early_stop = 0
         else:                             # earlystopping
@@ -128,7 +135,7 @@ def train(args, model, optimizer, criterion, train_loader, valid_loader, patienc
                 print(f'early stopping : stop training')
                 break
 
-        print(f'eval : {val_losses.avg:.6f}, best loss : {best_loss:.6f} ( {early_stop} / {patience} )')
+        print(f'eval : {val_losses.avg:.6f}, best correct : {best_corr:.2f}% ( {early_stop} / {patience} )')
 
     print(f'best epoch: {best_epoch}, loss: {best_loss:.9f}')
     

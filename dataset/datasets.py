@@ -43,10 +43,15 @@ class CustomDataset(Dataset):
         for label in self.labels:
              file_lists =  os.listdir(os.path.join(data_path, label))
              for fname in file_lists:
-                 ## data augmentation
+                 ## original
                  self.x.append(self.preprocessing(os.path.join(data_path, label, fname),
-                                                  resize, self.transform))
+                                                  resize))
                  self.y.append(label)
+                 ## data augmentation
+                 for i in range(3):
+                     self.x.append(self.preprocessing(os.path.join(data_path, label, fname),
+                                                      resize, self.transform))
+                     self.y.append(label)
         # encoding labels
         dataset_label_encoder = self.make_labels(self.labels)
         self.y = dataset_label_encoder.transform(self.y)
@@ -79,7 +84,7 @@ class CustomDataset(Dataset):
         return img
 
     def __len__(self):
-        return self.x[0].shape[0]
+        return len(self.x)
 
     def __getitem__(self, idx):
         return self.x[idx], torch.tensor(self.y[idx])
