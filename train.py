@@ -17,13 +17,13 @@ from torch.optim import SGD, Adam
 
 def get_argments():
     parser = argparse.ArgumentParser(description='cloud-type-classification')
-    parser.add_argument('--batchsize', type=int, default=8)
-    parser.add_argument('--epochs', type=int, default=20000)
+    parser.add_argument('--batchsize', type=int, default=16)
+    parser.add_argument('--epochs', type=int, default=1000)
     parser.add_argument('--learning_rate', type=int, default=0.001)
     parser.add_argument('--num_classes', type=int, default=11)
     parser.add_argument('--num_workers', type=int, default=4)
     parser.add_argument('--resize', type=int, default=227)
-    parser.add_argument('--patience', type=int, default=3)
+    parser.add_argument('--patience', type=int, default=25)
     parser.add_argument('--file_path', type=str, required=True)
     return parser.parse_args()
 
@@ -52,7 +52,7 @@ def main():
     # load model
     net = AlexNet(in_channel=3, 
                   out_channel=args.num_classes, 
-                  dropout=0.5)
+                  dropout=0.3)
 
     net.to(device)
     optim = SGD(net.parameters(), 
@@ -128,9 +128,9 @@ def train(args, model, optimizer, criterion, train_loader, valid_loader, patienc
                 print(f'early stopping : stop training')
                 break
 
-        print(f'eval : {val_losses.avg:.4f}, best loss : {best_loss:.4f} ( {early_stop} / {patience} )')
+        print(f'eval : {val_losses.avg:.6f}, best loss : {best_loss:.6f} ( {early_stop} / {patience} )')
 
-    print(f'best epoch: {best_epoch}, loss: {best_loss:.4f}')
+    print(f'best epoch: {best_epoch}, loss: {best_loss:.9f}')
     
     plot_learning_curve(train_loss, valid_loss, epoch)
     torch.save(best_model, 'best.pth')
@@ -142,7 +142,8 @@ def plot_learning_curve(train_loss, valid_loss, epoch):
     plt.plot(np.arange(1,epoch+1), train_loss, '-', color='b', label='train')
     plt.plot(np.arange(1,epoch+1), valid_loss, '-', color='r', label='valid')
     plt.legend(loc='best')
-    plt.show()
+    plt.savefig('learning_curve.png')
+    plt.close()
 
 if __name__ == "__main__":
     main()

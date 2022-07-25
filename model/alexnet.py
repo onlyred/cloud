@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 class AlexNet(nn.Module):
-    def __init__(self, in_channel : int, out_channel : int, dropout : float):
+    def __init__(self, in_channel : int, out_channel : int, dropout : float=0.5):
         super(AlexNet, self).__init__()
         self.cnn = nn.Sequential(
                 nn.Conv2d(in_channel, 64, kernel_size=11, stride=4, padding=2),
