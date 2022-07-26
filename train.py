@@ -60,8 +60,8 @@ def main():
                 momentum=0.9)
                 #weight_decay=0.1)
     scheduler = lr_scheduler.CyclicLR(optim, 
-                                      base_lr=0.00001, 
-                                      step_size_up=5, 
+                                      base_lr=0.000001, 
+                                      step_size_up=20, 
                                       max_lr=args.learning_rate,
                                       gamma=0.5,
                                       mode='exp_range')
@@ -150,8 +150,8 @@ def train(args, model, optimizer, criterion, scheduler,
 
     print(f'best epoch: {best_epoch}, loss: {best_loss:.9f}')
     
-    PlotLearningCurve(train_loss, valid_loss, corrections, epoch)
     torch.save(best_model, 'best.pth')
+    PlotLearningCurve(train_loss, valid_loss, corrections, epoch)
 
 if __name__ == "__main__":
     main()
