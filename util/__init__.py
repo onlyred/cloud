@@ -1,5 +1,6 @@
-from .utils import AverageMeter
+from .utils import AverageMeter, PlotLearningCurve
 
 __all__ = [
-            'AverageMeter'
+            'AverageMeter',
+            'PlotLearningCurve',
           ]

@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from dataset import CustomDataset
 from model import AlexNet
-from util import AverageMeter
+from util import AverageMeter, PlotLearningCurve
 
 import torch
 import torch.nn as nn
@@ -150,26 +150,8 @@ def train(args, model, optimizer, criterion, scheduler,
 
     print(f'best epoch: {best_epoch}, loss: {best_loss:.9f}')
     
-    plot_learning_curve(train_loss, valid_loss, corrections, epoch)
+    PlotLearningCurve(train_loss, valid_loss, corrections, epoch)
     torch.save(best_model, 'best.pth')
-
-def plot_learning_curve(train_loss, valid_loss, corr, epoch):
-    fig, ax1 = plt.subplots(figsize=(5,5))
-    ax1.set_xlabel('Epochs')
-    ax1.set_ylabel('Loss')
-    line1 = ax1.plot(np.arange(1,epoch+1), train_loss, '-', color='b', label='train-loss')
-    line2 = ax1.plot(np.arange(1,epoch+1), valid_loss, '-', color='r', label='valid-loss')
-  
-    ax2 = ax1.twinx()
-    ax2.set_ylabel('Correction(%)')
-    line3 = ax2.plot(np.arange(1,epoch+1), corr, '-', color='g', label='valid-corr')
-    # legend
-    line = line1 + line2 + line3
-    labs = [l.get_label() for l in line]
-    ax1.legend(line, labs, loc='best')
-
-    plt.savefig('learning_curve.png')
-    plt.close()
 
 if __name__ == "__main__":
     main()
