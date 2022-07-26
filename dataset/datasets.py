@@ -22,7 +22,7 @@ class CustomDataset(Dataset):
         self.transform = T.Compose([
                              T.ToPILImage(),
                              T.RandomResizedCrop(resize),
-                             T.ColorJitter(brightness=0.3),
+                             T.ColorJitter(brightness=0.3, saturation=0.3),
                              T.RandomHorizontalFlip(),
                              T.ToTensor(),
                          ])
@@ -48,7 +48,7 @@ class CustomDataset(Dataset):
                                                   resize))
                  self.y.append(label)
                  ## data augmentation
-                 for i in range(3):
+                 for i in range(9):
                      self.x.append(self.preprocessing(os.path.join(data_path, label, fname),
                                                       resize, self.transform))
                      self.y.append(label)

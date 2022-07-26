@@ -26,10 +26,12 @@ class AlexNet(nn.Module):
                 nn.ReLU(inplace=True),
                 nn.Linear(4096, out_channel),
         )
+        self.softmax = nn.Softmax()
         
     def forward(self, x):
         x = self.cnn(x)
         x = self.avgpool(x)
         x = x.view(x.size(0),-1)  # flatten
         x = self.classifier(x)
+        x = self.softmax(x)
         return x

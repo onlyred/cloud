@@ -18,12 +18,12 @@ from torch.optim import SGD, Adam, lr_scheduler
 def get_argments():
     parser = argparse.ArgumentParser(description='cloud-type-classification')
     parser.add_argument('--batchsize', type=int, default=32)
-    parser.add_argument('--epochs', type=int, default=10000)
+    parser.add_argument('--epochs', type=int, default=5000)
     parser.add_argument('--learning_rate', type=int, default=0.01)
     parser.add_argument('--num_classes', type=int, default=11)
     parser.add_argument('--num_workers', type=int, default=4)
     parser.add_argument('--resize', type=int, default=227)
-    parser.add_argument('--patience', type=int, default=100)
+    parser.add_argument('--patience', type=int, default=20)
     parser.add_argument('--file_path', type=str, required=True)
     return parser.parse_args()
 
@@ -68,7 +68,7 @@ def main():
     #optim = Adam(net.parameters(), 
     #             lr=args.learning_rate,
     #            weight_decay=0.1)
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss().to(device)
 
     train(args, net, optim, criterion, scheduler,
           train_loader, valid_loader, args.patience, device)
@@ -165,7 +165,7 @@ def plot_learning_curve(train_loss, valid_loss, corr, epoch):
     line3 = ax2.plot(np.arange(1,epoch+1), corr, '-', color='g', label='valid-corr')
     # legend
     line = line1 + line2 + line3
-    labs = [l.get_label() for l in lns]
+    labs = [l.get_label() for l in line]
     ax.legend(line, labs, loc='best')
 
     plt.savefig('learning_curve.png')
