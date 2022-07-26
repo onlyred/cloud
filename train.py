@@ -166,7 +166,7 @@ def plot_learning_curve(train_loss, valid_loss, corr, epoch):
     # legend
     line = line1 + line2 + line3
     labs = [l.get_label() for l in line]
-    ax.legend(line, labs, loc='best')
+    ax1.legend(line, labs, loc='best')
 
     plt.savefig('learning_curve.png')
     plt.close()
