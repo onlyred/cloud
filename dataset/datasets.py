@@ -48,7 +48,7 @@ class CustomDataset(Dataset):
                                                   resize))
                  self.y.append(label)
                  ## data augmentation
-                 for i in range(9):
+                 for i in range(19):
                      self.x.append(self.preprocessing(os.path.join(data_path, label, fname),
                                                       resize, self.transform))
                      self.y.append(label)
