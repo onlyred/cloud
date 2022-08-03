@@ -51,6 +51,9 @@ def main():
                               num_workers = args.num_workers)
     # load model
     net = torchvision.models.alexnet(pretrained=True)
+    # feeze features layer
+    for param in net.features:
+        param.requires_grad=False
     net.classifier[6] = nn.Linear(4096, args.num_classes)
 
     net.to(device)
