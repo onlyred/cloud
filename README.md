@@ -6,5 +6,5 @@ cloud type classification
 * Intelligent classification of ground-based visible cloud images using a transfer convolutional neural network and fine-tuning (2021)
 * Classifcation of imbalanced cloud image data using deep neural networks: performance improvement through a data science competition (2021)    
 * CloudA: A Ground-Based Cloud Classification Method with a Convolutional Neural Network (2020)  
-* Classifcation of imbalanced cloud image data using deep neural networks: performance improvement through a data science competitiona (2018)
+* Classifcation of imbalanced cloud image data using deep neural networks: performance improvement through a data science competition (2018)
 * CloudNet: Ground-Based Cloud Classification With Deep Convolutional Neural Network (2018)
